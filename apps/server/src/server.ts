@@ -6,7 +6,9 @@ import { authPlugin } from './plugins/auth';
 import { registerAuthRoutes } from './routes/auth.routes';
 import { registerInstallRoutes } from './routes/install.routes';
 import { registerTradeRoutes } from './routes/trade.routes';
+import { registerSyncRoutes } from './routes/sync.routes';
 import { AuthService } from './services/auth.service';
+import { SyncService } from './services/sync.service';
 import { ExpenseService } from './services/expense.service';
 import { InstallService } from './services/install.service';
 import { LedgerService } from './services/ledger.service';
@@ -35,6 +37,7 @@ export interface AppContext {
   sales: SaleService;
   payments: PaymentService;
   expenses: ExpenseService;
+  sync: SyncService;
 }
 
 export interface BuiltServer {
@@ -70,6 +73,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
     sales: new SaleService(deps, parties, products),
     payments: new PaymentService(deps, parties),
     expenses: new ExpenseService(deps),
+    sync: new SyncService(deps, options.dbPath),
   };
 
   const app = Fastify({ logger: options.logger ?? false });
@@ -114,6 +118,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   registerAuthRoutes(app, ctx.auth);
   registerInstallRoutes(app, ctx.install);
   registerTradeRoutes(app, ctx);
+  registerSyncRoutes(app, ctx);
 
   app.addHook('onClose', async () => {
     ctx.sqlite.close();

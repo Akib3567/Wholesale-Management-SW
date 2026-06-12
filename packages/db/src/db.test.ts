@@ -33,6 +33,7 @@ const EXPECTED_TABLES = [
   'journal_lines',
   'parties',
   'products',
+  'product_merges',
   'stock_moves',
   'purchases',
   'purchase_items',

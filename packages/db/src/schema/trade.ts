@@ -61,6 +61,26 @@ export const products = sqliteTable(
   ],
 );
 
+/**
+ * Hub-issued instruction mapping a provisional product to its master.
+ * Owned by the hub (branch_code='SHARED') and synced like any other data;
+ * the ORIGIN branch applies it to its own provisional row on import (sets
+ * master_id, deactivates, bumps its own change_seq) — so the hub never has
+ * to edit a foreign branch's row.
+ */
+export const productMerges = sqliteTable(
+  'product_merges',
+  {
+    ...syncColumns,
+    provisionalId: text('provisional_id').notNull(),
+    masterId: text('master_id').notNull(),
+  },
+  (t) => [
+    uniqueIndex('product_merges_provisional_uq').on(t.provisionalId),
+    index('product_merges_branch_seq_idx').on(t.branchCode, t.changeSeq),
+  ],
+);
+
 export const STOCK_MOVE_TYPES = ['in', 'out', 'adjust', 'return'] as const;
 export type StockMoveType = (typeof STOCK_MOVE_TYPES)[number];
 
