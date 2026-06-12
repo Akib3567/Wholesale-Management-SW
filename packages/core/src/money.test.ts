@@ -12,7 +12,7 @@ import {
   subtractPaisa,
   sumPaisa,
   takaFromPaisa,
-} from './money.js';
+} from './money';
 
 describe('the float problem this module exists to prevent', () => {
   it('0.1 + 0.2 is broken in float but exact in paisa', () => {

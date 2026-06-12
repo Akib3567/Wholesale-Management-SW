@@ -12,7 +12,7 @@ export {
   multiplyPaisa,
   percentOfPaisa,
   formatTaka,
-} from './money.js';
-export type { Paisa } from './money.js';
+} from './money';
+export type { Paisa } from './money';
 
-export { newUlid, isUlid, ULID_REGEX } from './ulid.js';
+export { newUlid, isUlid, ULID_REGEX } from './ulid';

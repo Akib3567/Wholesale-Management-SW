@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ULID_REGEX, isUlid, newUlid } from './ulid.js';
+import { ULID_REGEX, isUlid, newUlid } from './ulid';
 
 describe('newUlid', () => {
   it('generates 26-char Crockford base32 IDs', () => {
