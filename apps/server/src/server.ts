@@ -5,9 +5,17 @@ import { AppError } from './errors';
 import { authPlugin } from './plugins/auth';
 import { registerAuthRoutes } from './routes/auth.routes';
 import { registerInstallRoutes } from './routes/install.routes';
+import { registerTradeRoutes } from './routes/trade.routes';
 import { AuthService } from './services/auth.service';
+import { ExpenseService } from './services/expense.service';
 import { InstallService } from './services/install.service';
 import { LedgerService } from './services/ledger.service';
+import { PartyService } from './services/party.service';
+import { PaymentService } from './services/payment.service';
+import { ProductService } from './services/product.service';
+import { PurchaseService } from './services/purchase.service';
+import { SaleService } from './services/sale.service';
+import type { ServiceDeps } from './services/deps';
 import type { Sqlite } from './services/change-seq';
 
 export interface BuildServerOptions {
@@ -21,6 +29,12 @@ export interface AppContext {
   auth: AuthService;
   install: InstallService;
   ledger: LedgerService;
+  parties: PartyService;
+  products: ProductService;
+  purchases: PurchaseService;
+  sales: SaleService;
+  payments: PaymentService;
+  expenses: ExpenseService;
 }
 
 export interface BuiltServer {
@@ -38,12 +52,24 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   runMigrations(db);
   await seedDatabase(db);
 
+  const install = new InstallService(sqlite, db);
+  const ledger = new LedgerService(sqlite, db);
+  const deps: ServiceDeps = { sqlite, db, install, ledger };
+  const parties = new PartyService(deps);
+  const products = new ProductService(deps);
+
   const ctx: AppContext = {
     sqlite,
     db,
     auth: new AuthService(db),
-    install: new InstallService(sqlite, db),
-    ledger: new LedgerService(sqlite, db),
+    install,
+    ledger,
+    parties,
+    products,
+    purchases: new PurchaseService(deps, parties, products),
+    sales: new SaleService(deps, parties, products),
+    payments: new PaymentService(deps, parties),
+    expenses: new ExpenseService(deps),
   };
 
   const app = Fastify({ logger: options.logger ?? false });
@@ -87,6 +113,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
 
   registerAuthRoutes(app, ctx.auth);
   registerInstallRoutes(app, ctx.install);
+  registerTradeRoutes(app, ctx);
 
   app.addHook('onClose', async () => {
     ctx.sqlite.close();
