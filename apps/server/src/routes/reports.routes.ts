@@ -122,6 +122,91 @@ export function registerReportRoutes(app: FastifyInstance, ctx: AppContext): voi
     };
   });
 
+  // ---- Daily day-view: the day's docs + cash balance-forward ----
+  app.get('/api/reports/daily', read, async (req) => {
+    const q = z
+      .object({ date: z.string().regex(DATE_RE), scope: z.string().max(20).optional() })
+      .parse(req.query);
+    const scope = resolveScope(ctx, q.scope);
+    const eFilter = scope.branch ? 'AND e.branch_code = @branch' : '';
+    const dFilter = scope.branch ? 'AND d.branch_code = @branch' : '';
+    const base = scope.branch ? { branch: scope.branch } : {};
+
+    // Balance forward = net of all cash-account lines before this day.
+    const openingCashPaisa = (
+      ctx.sqlite
+        .prepare(
+          `SELECT COALESCE(SUM(l.debit_paisa - l.credit_paisa), 0) v
+           FROM journal_lines l
+           JOIN accounts a ON a.id = l.account_id AND a.is_cash = 1
+           JOIN journal_entries e ON e.id = l.entry_id
+           WHERE e.entry_date < @date ${eFilter}`,
+        )
+        .get({ ...base, date: q.date }) as { v: number }
+    ).v;
+    const dayCashPaisa = (
+      ctx.sqlite
+        .prepare(
+          `SELECT COALESCE(SUM(l.debit_paisa - l.credit_paisa), 0) v
+           FROM journal_lines l
+           JOIN accounts a ON a.id = l.account_id AND a.is_cash = 1
+           JOIN journal_entries e ON e.id = l.entry_id
+           WHERE e.entry_date = @date ${eFilter}`,
+        )
+        .get({ ...base, date: q.date }) as { v: number }
+    ).v;
+
+    const docList = (table: 'sales' | 'purchases') =>
+      ctx.sqlite
+        .prepare(
+          `SELECT d.id, d.doc_no AS docNo, d.branch_code AS branchCode, p.name AS partyName,
+                  d.total_paisa AS totalPaisa, d.paid_paisa AS paidPaisa, d.status
+           FROM ${table} d LEFT JOIN parties p ON p.id = d.party_id
+           WHERE d.doc_date = @date AND d.status = 'posted' ${dFilter}
+           ORDER BY d.doc_no`,
+        )
+        .all({ ...base, date: q.date });
+
+    const expenseList = ctx.sqlite
+      .prepare(
+        `SELECT d.id, a.name AS accountName, d.amount_paisa AS amountPaisa, d.note,
+                d.branch_code AS branchCode
+         FROM expenses d JOIN accounts a ON a.id = d.expense_account_id
+         WHERE d.spent_date = @date ${dFilter} ORDER BY d.id`,
+      )
+      .all({ ...base, date: q.date });
+
+    const paymentList = ctx.sqlite
+      .prepare(
+        `SELECT d.id, d.direction, d.amount_paisa AS amountPaisa, d.method, p.name AS partyName,
+                d.branch_code AS branchCode
+         FROM payments d LEFT JOIN parties p ON p.id = d.party_id
+         WHERE d.paid_date = @date ${dFilter} ORDER BY d.id`,
+      )
+      .all({ ...base, date: q.date });
+
+    const sales = docList('sales') as Array<{ totalPaisa: number; paidPaisa: number }>;
+    const purchases = docList('purchases') as Array<{ totalPaisa: number; paidPaisa: number }>;
+    const expenses = expenseList as Array<{ amountPaisa: number }>;
+
+    return {
+      scope: scope.branch ?? 'ALL',
+      asOf: scope.asOf,
+      date: q.date,
+      openingCashPaisa,
+      closingCashPaisa: openingCashPaisa + dayCashPaisa,
+      sales,
+      purchases,
+      expenses,
+      payments: paymentList,
+      totals: {
+        salesPaisa: sales.reduce((s, r) => s + r.totalPaisa, 0),
+        purchasesPaisa: purchases.reduce((s, r) => s + r.totalPaisa, 0),
+        expensesPaisa: expenses.reduce((s, r) => s + r.amountPaisa, 0),
+      },
+    };
+  });
+
   // ---- P&L over a date range ----
   app.get('/api/reports/pnl', read, async (req) => {
     const q = z

@@ -20,6 +20,7 @@ export const SYSTEM_ACCOUNTS = {
   SALES_REVENUE: 'ACC-4010',
   OTHER_INCOME: 'ACC-4900',
   COGS: 'ACC-5010',
+  INVENTORY_ADJUSTMENT: 'ACC-5020',
 } as const;
 
 interface AccountSeed {
@@ -48,6 +49,7 @@ export const CHART_OF_ACCOUNTS: AccountSeed[] = [
   { code: '4900', name: 'Other Income', type: 'income', parentCode: '4000', isSystem: true },
   { code: '5000', name: 'Expenses', type: 'expense', isSystem: true },
   { code: '5010', name: 'Cost of Goods Sold', type: 'expense', parentCode: '5000', isSystem: true },
+  { code: '5020', name: 'Inventory Adjustment', type: 'expense', parentCode: '5000', isSystem: true },
   { code: '5100', name: 'Salaries', type: 'expense', parentCode: '5000' },
   { code: '5110', name: 'Rent', type: 'expense', parentCode: '5000' },
   { code: '5120', name: 'Transport', type: 'expense', parentCode: '5000' },

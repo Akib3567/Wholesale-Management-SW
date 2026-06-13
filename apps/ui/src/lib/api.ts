@@ -53,6 +53,22 @@ export const api = {
   del: <T>(path: string) => request<T>('DELETE', path),
 };
 
+/** Fetch a binary response with auth and save it (e.g. a sync packet to copy onto a pendrive). */
+export async function downloadAuthed(path: string, saveAs: string): Promise<void> {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: token ? { authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new ApiError('Download failed', 'DOWNLOAD', res.status);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = saveAs;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ---------- shared entity types (server returns drizzle camelCase rows) ----------
 
 export type Role = 'admin' | 'manager' | 'operator' | 'viewer';
@@ -116,6 +132,72 @@ export interface TradeDoc {
   paidPaisa: number;
   status: 'posted' | 'reversed';
   note: string | null;
+}
+
+export interface StockRow {
+  productId: string;
+  name: string;
+  sku: string | null;
+  unit: string;
+  category: string | null;
+  branchCode: string;
+  isProvisional: boolean;
+  qtyOnHandMilli: number;
+  avgCostPaisa: number;
+  valuePaisa: number;
+  reorderLevelMilli: number;
+  isLow: boolean;
+}
+export interface InventoryData {
+  branch: string;
+  rows: StockRow[];
+  totalValuePaisa: number;
+  lowStockCount: number;
+}
+
+export interface SyncStateRow {
+  peerBranch: string;
+  lastExportSeq: number;
+  lastImportSeq: number;
+  lastExportAt: string | null;
+  lastImportAt: string | null;
+}
+export interface SyncLogRow {
+  id: string;
+  direction: 'export' | 'import';
+  peerBranch: string;
+  recordCount: number;
+  status: 'ok' | 'rejected' | 'failed';
+  detail: string | null;
+  at: string;
+}
+export interface SyncStatus {
+  branchCode: string | null;
+  isHub: boolean;
+  passphraseSet: boolean;
+  state: SyncStateRow[];
+  log: SyncLogRow[];
+}
+export interface ExportResult {
+  filePath: string;
+  packetId: string;
+  kind: 'branch' | 'combined';
+  fromSeq: number;
+  toSeq: number;
+  counts: Record<string, number>;
+  totalRows: number;
+}
+export interface ImportResult {
+  senderBranch: string;
+  kind: 'branch' | 'combined';
+  counts: {
+    inserted: number;
+    updated: number;
+    skippedOwn: number;
+    skippedUnchanged: number;
+    mergedProducts: number;
+  };
+  branchesSeen: string[];
 }
 
 export interface DashboardData {

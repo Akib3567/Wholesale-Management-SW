@@ -18,6 +18,9 @@ import { TrialBalancePage } from './pages/accounting/TrialBalancePage';
 import { DailySales, DailyPurchases } from './pages/reports/DailyPages';
 import { StatementPage } from './pages/reports/StatementPage';
 import { PnlPage } from './pages/reports/PnlPage';
+import { InventoryPage } from './pages/InventoryPage';
+import { DailyPage } from './pages/DailyPage';
+import { SyncCenterPage } from './pages/SyncCenterPage';
 
 export function App() {
   return (
@@ -49,6 +52,9 @@ export function App() {
           <Route path="/reports/daily-purchases" element={<DailyPurchases />} />
           <Route path="/reports/statement" element={<StatementPage />} />
           <Route path="/reports/pnl" element={<PnlPage />} />
+          <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/daily" element={<DailyPage />} />
+          <Route path="/sync" element={<SyncCenterPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,11 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import {
+  CalendarDays,
   LayoutDashboard,
   LogOut,
   Package,
+  RefreshCw,
   ShoppingCart,
   Tag,
   Users,
+  Warehouse,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { Badge } from './ui/badge';
@@ -16,8 +19,11 @@ const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/sales', label: 'Sales', icon: Tag },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
+  { to: '/daily', label: 'Daily', icon: CalendarDays },
   { to: '/parties', label: 'Parties', icon: Users },
   { to: '/products', label: 'Products', icon: Package },
+  { to: '/inventory', label: 'Inventory', icon: Warehouse },
+  { to: '/sync', label: 'Sync Center', icon: RefreshCw },
 ];
 
 const accountingNav = [
@@ -35,7 +41,7 @@ const reportsNav = [
   { to: '/reports/pnl', label: 'Profit & Loss' },
 ];
 
-const comingSoon = ['Daily', 'Inventory', 'Sync Center', 'Settings'];
+const comingSoon = ['Settings'];
 
 export function Layout() {
   const { user, install, logout } = useAuth();

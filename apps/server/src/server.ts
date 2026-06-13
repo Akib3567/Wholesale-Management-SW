@@ -10,11 +10,13 @@ import { registerSyncRoutes } from './routes/sync.routes';
 import { registerDashboardRoutes } from './routes/dashboard.routes';
 import { registerAccountingRoutes } from './routes/accounting.routes';
 import { registerReportRoutes } from './routes/reports.routes';
+import { registerInventoryRoutes } from './routes/inventory.routes';
 import { AuthService } from './services/auth.service';
 import { SyncService } from './services/sync.service';
 import { ExpenseService } from './services/expense.service';
 import { InstallService } from './services/install.service';
 import { LedgerService } from './services/ledger.service';
+import { InventoryService } from './services/inventory.service';
 import { PartyService } from './services/party.service';
 import { PaymentService } from './services/payment.service';
 import { ProductService } from './services/product.service';
@@ -40,6 +42,7 @@ export interface AppContext {
   sales: SaleService;
   payments: PaymentService;
   expenses: ExpenseService;
+  inventory: InventoryService;
   sync: SyncService;
 }
 
@@ -76,6 +79,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
     sales: new SaleService(deps, parties, products),
     payments: new PaymentService(deps, parties),
     expenses: new ExpenseService(deps),
+    inventory: new InventoryService(deps, products),
     sync: new SyncService(deps, options.dbPath),
   };
 
@@ -125,6 +129,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   registerDashboardRoutes(app, ctx);
   registerAccountingRoutes(app, ctx);
   registerReportRoutes(app, ctx);
+  registerInventoryRoutes(app, ctx);
 
   app.addHook('onClose', async () => {
     ctx.sqlite.close();

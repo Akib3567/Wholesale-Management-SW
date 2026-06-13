@@ -1,10 +1,12 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../server';
+import { z } from 'zod';
 import {
   exportSchema,
   importSchema,
   mergeProductSchema,
   passphraseSchema,
+  uploadSchema,
 } from '../services/sync.service';
 
 function actor(req: FastifyRequest): string | null {
@@ -34,6 +36,21 @@ export function registerSyncRoutes(app: FastifyInstance, ctx: AppContext): void 
 
   app.post('/api/sync/import', manage, async (req) => {
     return ctx.sync.importPacketFile(importSchema.parse(req.body), actor(req));
+  });
+
+  // Browser file-picker import: packet bytes uploaded as base64.
+  app.post('/api/sync/import-upload', manage, async (req) => {
+    return ctx.sync.importPacketBytes(uploadSchema.parse(req.body), actor(req));
+  });
+
+  // Download a previously-exported packet (to copy onto a pendrive).
+  app.get('/api/sync/download', manage, async (req, reply) => {
+    const { name } = z.object({ name: z.string().min(1) }).parse(req.query);
+    const { fileName, buffer } = ctx.sync.readPacketForDownload(name);
+    reply
+      .header('content-type', 'application/octet-stream')
+      .header('content-disposition', `attachment; filename="${fileName}"`);
+    return reply.send(buffer);
   });
 
   app.post('/api/sync/merge-product', manage, async (req) => {

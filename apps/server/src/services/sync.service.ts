@@ -53,6 +53,11 @@ export const exportSchema = z.object({
 
 export const importSchema = z.object({ filePath: z.string().min(1) });
 
+export const uploadSchema = z.object({
+  fileName: z.string().trim().max(200).optional(),
+  fileBase64: z.string().min(1),
+});
+
 export const mergeProductSchema = z.object({
   provisionalId: z.string().min(1),
   /** Merge into this existing master; omit to create a new master from the provisional. */
@@ -121,6 +126,25 @@ export class SyncService {
       throw new ConflictError('Sync passphrase is not set — configure it in Settings first');
     }
     return p;
+  }
+
+  /** Default folder packets are written to / served from (beside the DB file). */
+  private defaultPacketDir(): string {
+    return resolve(join(dirname(this.dbPath), 'sync-packets'));
+  }
+
+  /**
+   * Read a previously-exported packet for download. Basename only and must
+   * end in .packet — no path traversal, no reading arbitrary files.
+   */
+  readPacketForDownload(name: string): { fileName: string; buffer: Buffer } {
+    const base = name.replace(/^.*[\\/]/, '');
+    if (!base.endsWith('.packet') || base.includes('..')) {
+      throw new BadRequestError('Invalid packet file name');
+    }
+    const filePath = join(this.defaultPacketDir(), base);
+    if (!existsSync(filePath)) throw new NotFoundError(`No packet named ${base}`);
+    return { fileName: base, buffer: readFileSync(filePath) };
   }
 
   // ---------- status ----------
@@ -262,11 +286,25 @@ export class SyncService {
 
   importPacketFile(input: z.input<typeof importSchema>, actorId: string | null): ImportResult {
     const { filePath } = importSchema.parse(input);
+    if (!existsSync(filePath)) throw new NotFoundError(`No file at ${filePath}`);
+    return this.importBuffer(readFileSync(filePath), actorId);
+  }
+
+  /** Import a packet the UI uploaded (browser file picker) as base64 bytes. */
+  importPacketBytes(input: z.input<typeof uploadSchema>, actorId: string | null): ImportResult {
+    const { fileBase64 } = uploadSchema.parse(input);
+    let buffer: Buffer;
+    try {
+      buffer = Buffer.from(fileBase64, 'base64');
+    } catch {
+      throw new BadRequestError('Uploaded packet is not valid base64');
+    }
+    return this.importBuffer(buffer, actorId);
+  }
+
+  private importBuffer(buffer: Buffer, actorId: string | null): ImportResult {
     const install = requireInstall(this.deps);
     const passphrase = this.requirePassphrase();
-
-    if (!existsSync(filePath)) throw new NotFoundError(`No file at ${filePath}`);
-    const buffer = readFileSync(filePath);
     const peek = peekPacketMeta(buffer);
 
     let packet: SyncPacket;
