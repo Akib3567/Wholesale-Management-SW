@@ -86,6 +86,24 @@ describe('inventory list & valuation', () => {
     expect(row.isLow).toBe(false);
     expect(inv.totalValuePaisa).toBeGreaterThanOrEqual(100_000);
   });
+
+  it('scope=THIS resolves to this branch (the path the UI uses)', async () => {
+    // Regression: 'THIS' must map to the install branch, not be used as a literal filter.
+    const inv = await get<{
+      branch: string;
+      rows: Array<{ productId: string; qtyOnHandMilli: number }>;
+    }>('/api/inventory?scope=THIS');
+    expect(inv.branch).toBe('DHAKA');
+    expect(inv.rows.find((r) => r.productId === productId)?.qtyOnHandMilli).toBe(10_000);
+  });
+
+  it('scope=ALL sums across branches', async () => {
+    const inv = await get<{ branch: string; rows: Array<{ productId: string; qtyOnHandMilli: number }> }>(
+      '/api/inventory?scope=ALL',
+    );
+    expect(inv.branch).toBe('ALL');
+    expect(inv.rows.find((r) => r.productId === productId)?.qtyOnHandMilli).toBe(10_000);
+  });
 });
 
 describe('manual stock adjustment', () => {
@@ -149,6 +167,8 @@ describe('daily day-view with cash balance-forward', () => {
     const day = await get<{
       openingCashPaisa: number;
       closingCashPaisa: number;
+      receivablesPaisa: number;
+      payablesPaisa: number;
       sales: unknown[];
       totals: { salesPaisa: number; purchasesPaisa: number };
     }>(`/api/reports/daily?date=${D}`);
@@ -159,5 +179,25 @@ describe('daily day-view with cash balance-forward', () => {
     expect(day.openingCashPaisa).toBe(0);
     expect(day.closingCashPaisa).toBe(20_000); // +20000 sale (purchase was on credit)
     expect(day.sales.length).toBe(1);
+
+    // Outstanding dues as of D: the credit purchase left AP = 100000; sales were cash so AR = 0.
+    expect(day.payablesPaisa).toBe(100_000);
+    expect(day.receivablesPaisa).toBe(0);
+  });
+
+  it('a credit sale increases receivables as of the day', async () => {
+    const { party } = await post<{ party: { id: string } }>('/api/parties', {
+      name: 'Daily Credit Customer',
+      kind: 'customer',
+    });
+    // sell 1 @ 300.00, pay only 100.00 -> 200.00 receivable
+    await post('/api/sales', {
+      partyId: party.id,
+      docDate: D,
+      items: [{ productId, qtyMilli: 1_000, unitPricePaisa: 30_000 }],
+      paidPaisa: 10_000,
+    });
+    const day = await get<{ receivablesPaisa: number }>(`/api/reports/daily?date=${D}`);
+    expect(day.receivablesPaisa).toBe(20_000);
   });
 });

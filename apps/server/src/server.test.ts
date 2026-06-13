@@ -23,7 +23,7 @@ describe('health & login', () => {
   it('reports healthy and unconfigured before setup', async () => {
     const res = await server.app.inject({ method: 'GET', url: '/api/health' });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ ok: true, branchConfigured: false });
+    expect(res.json()).toEqual({ ok: true, branchConfigured: false, restoreApplied: false });
   });
 
   it('rejects a wrong password', async () => {

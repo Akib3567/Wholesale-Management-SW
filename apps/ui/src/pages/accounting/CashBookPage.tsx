@@ -122,10 +122,10 @@ export function CashBookPage({ kind }: { kind: 'cash' | 'bank' }) {
                     <TD>{r.branchCode}</TD>
                     <TD>{r.narration}</TD>
                     <TD>{r.partyName ?? ''}</TD>
-                    <TD className="text-right tabular-nums text-emerald-700">
+                    <TD className="text-right tabular-nums text-emerald-700 dark:text-emerald-400">
                       {r.debitPaisa ? formatPaisa(r.debitPaisa) : ''}
                     </TD>
-                    <TD className="text-right tabular-nums text-red-700">
+                    <TD className="text-right tabular-nums text-red-700 dark:text-red-400">
                       {r.creditPaisa ? formatPaisa(r.creditPaisa) : ''}
                     </TD>
                     <TD className="text-right font-medium tabular-nums">{formatPaisa(r.balancePaisa)}</TD>

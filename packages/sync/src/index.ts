@@ -10,3 +10,13 @@ export {
 } from './types';
 export { sealPacket, openPacket, peekPacketMeta, buildManifest, type OpenedPacket } from './packet';
 export { canonicalStringify } from './canonical';
+export {
+  deriveKeys,
+  newSalt,
+  encryptAesGcm,
+  decryptAesGcm,
+  SCRYPT_PARAMS,
+  SALT_BYTES,
+  type DerivedKeys,
+  type EncryptedBlob,
+} from './crypto';

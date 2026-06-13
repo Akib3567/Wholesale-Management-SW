@@ -12,7 +12,11 @@ let ctg: BuiltServer;
 let dhakaToken: string;
 let ctgToken: string;
 
-async function login(server: BuiltServer, username = DEFAULT_ADMIN.username, password = DEFAULT_ADMIN.password) {
+async function login(
+  server: BuiltServer,
+  username: string = DEFAULT_ADMIN.username,
+  password: string = DEFAULT_ADMIN.password,
+) {
   const res = await server.app.inject({
     method: 'POST',
     url: '/api/auth/login',

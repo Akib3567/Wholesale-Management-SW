@@ -1,8 +1,11 @@
-# Leather ERP
+# NSK Enterprise
 
 Local-first, fully **offline** desktop ERP for a wholesale leather-products business with
 multiple independent branch PCs that sync by **carrying a file** between them
 (pendrive / file share). No live network between branches.
+
+> Internal monorepo packages keep the `@leather-erp/*` scope as the product's code-level
+> identifier; the application brand shown to users is **NSK Enterprise**.
 
 ## Core guarantees
 

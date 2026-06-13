@@ -1,11 +1,16 @@
 /** Dev/standalone runner. In production Electron launches buildServer() in-process. */
 import { resolve } from 'node:path';
 import { buildServer } from './server';
+import { BackupScheduler } from './services/backup-schedule';
 
 const dbPath = resolve(process.env['ERP_DB_PATH'] ?? './shop.sqlite');
 const port = Number(process.env['ERP_PORT'] ?? 3001);
 
-const { app } = await buildServer({ dbPath, logger: true });
+const { app, ctx } = await buildServer({ dbPath, logger: true });
+
+// Scheduled backups (daily/weekly/monthly/yearly) run only in the live app.
+const scheduler = new BackupScheduler(ctx.backup);
+scheduler.start();
 
 try {
   // 127.0.0.1 only: the ERP must never be reachable from the network.
@@ -25,6 +30,7 @@ try {
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
+    scheduler.stop();
     void app.close().then(() => process.exit(0));
   });
 }

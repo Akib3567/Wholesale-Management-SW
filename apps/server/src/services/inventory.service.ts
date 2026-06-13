@@ -53,8 +53,9 @@ export class InventoryService {
    */
   listStock(branchScope?: string | undefined): StockListResult {
     const install = requireInstall(this.deps);
-    const scope = (branchScope ?? install.branchCode).toUpperCase();
-    const branch = scope === 'ALL' ? null : scope;
+    const scope = (branchScope ?? 'THIS').toUpperCase();
+    // 'THIS' -> this install's branch, 'ALL' -> whole company, else a specific branch code.
+    const branch = scope === 'ALL' ? null : scope === 'THIS' ? install.branchCode : scope;
     const filter = branch ? 'AND m.branch_code = @branch' : '';
     const params = branch ? { branch } : {};
 

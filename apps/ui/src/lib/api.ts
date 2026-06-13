@@ -120,6 +120,40 @@ export interface Product {
   isActive: boolean;
 }
 
+export interface Account {
+  id: string;
+  code: string;
+  name: string;
+  type: 'asset' | 'liability' | 'equity' | 'income' | 'expense';
+  isCash: boolean;
+  isBank: boolean;
+  parentId: string | null;
+  isActive: boolean;
+}
+
+export interface ExpenseRow {
+  id: string;
+  branchCode: string;
+  expenseAccountId: string;
+  paidFromAccountId: string | null;
+  amountPaisa: number;
+  note: string | null;
+  spentDate: string;
+}
+
+export interface PaymentRow {
+  id: string;
+  branchCode: string;
+  partyId: string;
+  direction: 'in' | 'out';
+  amountPaisa: number;
+  method: 'cash' | 'bank';
+  accountId: string;
+  refNo: string | null;
+  paidDate: string;
+  note: string | null;
+}
+
 export interface TradeDoc {
   id: string;
   branchCode: string;
@@ -198,6 +232,20 @@ export interface ImportResult {
     mergedProducts: number;
   };
   branchesSeen: string[];
+}
+
+export interface BackupRecord {
+  id: string;
+  kind: 'manual' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'on_close';
+  filePath: string;
+  sizeBytes: number;
+  sha256: string;
+  takenAt: string;
+  status: string;
+}
+export interface BackupsData {
+  passphraseSet: boolean;
+  backups: BackupRecord[];
 }
 
 export interface DashboardData {

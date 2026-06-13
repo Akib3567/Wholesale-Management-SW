@@ -185,6 +185,26 @@ export function registerReportRoutes(app: FastifyInstance, ctx: AppContext): voi
       )
       .all({ ...base, date: q.date });
 
+    // Outstanding dues as of the END of the selected day (running balances, like closing cash).
+    const receivablesPaisa = (
+      ctx.sqlite
+        .prepare(
+          `SELECT COALESCE(SUM(l.debit_paisa - l.credit_paisa), 0) v
+           FROM journal_lines l JOIN journal_entries e ON e.id = l.entry_id
+           WHERE l.account_id = @ar AND e.entry_date <= @date ${eFilter}`,
+        )
+        .get({ ...base, ar: AR, date: q.date }) as { v: number }
+    ).v;
+    const payablesPaisa = (
+      ctx.sqlite
+        .prepare(
+          `SELECT COALESCE(SUM(l.credit_paisa - l.debit_paisa), 0) v
+           FROM journal_lines l JOIN journal_entries e ON e.id = l.entry_id
+           WHERE l.account_id = @ap AND e.entry_date <= @date ${eFilter}`,
+        )
+        .get({ ...base, ap: AP, date: q.date }) as { v: number }
+    ).v;
+
     const sales = docList('sales') as Array<{ totalPaisa: number; paidPaisa: number }>;
     const purchases = docList('purchases') as Array<{ totalPaisa: number; paidPaisa: number }>;
     const expenses = expenseList as Array<{ amountPaisa: number }>;
@@ -195,6 +215,8 @@ export function registerReportRoutes(app: FastifyInstance, ctx: AppContext): voi
       date: q.date,
       openingCashPaisa,
       closingCashPaisa: openingCashPaisa + dayCashPaisa,
+      receivablesPaisa,
+      payablesPaisa,
       sales,
       purchases,
       expenses,

@@ -127,7 +127,7 @@ export function PnlPage() {
                 </TR>
                 <TR className="border-t-2 text-base font-bold">
                   <TD>Net Profit</TD>
-                  <TD className={`text-right tabular-nums ${data.netProfitPaisa < 0 ? 'text-destructive' : 'text-emerald-700'}`}>
+                  <TD className={`text-right tabular-nums ${data.netProfitPaisa < 0 ? 'text-destructive' : 'text-emerald-700 dark:text-emerald-400'}`}>
                     {formatPaisa(data.netProfitPaisa)}
                   </TD>
                 </TR>

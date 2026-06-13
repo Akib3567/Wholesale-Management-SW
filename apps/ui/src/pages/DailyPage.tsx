@@ -18,6 +18,8 @@ interface DailyData {
   date: string;
   openingCashPaisa: number;
   closingCashPaisa: number;
+  receivablesPaisa: number;
+  payablesPaisa: number;
   sales: DocLine[];
   purchases: DocLine[];
   expenses: ExpenseLine[];
@@ -83,6 +85,29 @@ export function DailyPage() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Card>
+                <CardContent className="p-3">
+                  <div className="text-xs text-muted-foreground">
+                    Total Receivables (due to us) — as of {data.date}
+                  </div>
+                  <div className="text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
+                    {formatPaisa(data.receivablesPaisa)}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-3">
+                  <div className="text-xs text-muted-foreground">
+                    Total Payables (we owe) — as of {data.date}
+                  </div>
+                  <div className="text-lg font-bold tabular-nums text-red-700 dark:text-red-400">
+                    {formatPaisa(data.payablesPaisa)}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             <Section title={`Sales (${data.sales.length})`}>

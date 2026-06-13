@@ -277,7 +277,7 @@ function ImportCard({ onDone }: { onDone: () => void }) {
         )}
         {error && <ErrorNote message={error} />}
         {result && (
-          <div className="rounded-md border bg-emerald-50 p-3 text-sm text-emerald-900">
+          <div className="rounded-md border bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200">
             Imported from <strong>{result.senderBranch}</strong> ({result.kind}):{' '}
             {result.counts.inserted} new, {result.counts.updated} updated,{' '}
             {result.counts.skippedUnchanged} unchanged, {result.counts.skippedOwn} own-rows skipped

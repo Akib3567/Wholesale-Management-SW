@@ -15,7 +15,7 @@ export interface AsOfBranch {
 export function AsOfNote({ asOf }: { asOf: AsOfBranch[] }) {
   if (asOf.length === 0) return null;
   return (
-    <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+    <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
       {asOf.map((b) => (
         <div key={b.code}>
           <strong>{b.code}</strong> data as of{' '}

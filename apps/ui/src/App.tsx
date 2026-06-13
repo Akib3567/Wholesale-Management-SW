@@ -19,8 +19,11 @@ import { DailySales, DailyPurchases } from './pages/reports/DailyPages';
 import { StatementPage } from './pages/reports/StatementPage';
 import { PnlPage } from './pages/reports/PnlPage';
 import { InventoryPage } from './pages/InventoryPage';
+import { ExpensesPage } from './pages/ExpensesPage';
+import { PaymentsPage } from './pages/PaymentsPage';
 import { DailyPage } from './pages/DailyPage';
 import { SyncCenterPage } from './pages/SyncCenterPage';
+import { BackupsPage } from './pages/BackupsPage';
 
 export function App() {
   return (
@@ -53,8 +56,11 @@ export function App() {
           <Route path="/reports/statement" element={<StatementPage />} />
           <Route path="/reports/pnl" element={<PnlPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/payments" element={<PaymentsPage />} />
+          <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/daily" element={<DailyPage />} />
           <Route path="/sync" element={<SyncCenterPage />} />
+          <Route path="/backups" element={<BackupsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

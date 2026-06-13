@@ -1,29 +1,36 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   CalendarDays,
+  DatabaseBackup,
   LayoutDashboard,
   LogOut,
   Package,
+  Receipt,
   RefreshCw,
   ShoppingCart,
   Tag,
   Users,
+  Wallet,
   Warehouse,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { ThemeToggle } from '../theme/ThemeToggle';
 import { cn } from '../lib/utils';
 
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/sales', label: 'Sales', icon: Tag },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
+  { to: '/payments', label: 'Payments', icon: Wallet },
+  { to: '/expenses', label: 'Expenses', icon: Receipt },
   { to: '/daily', label: 'Daily', icon: CalendarDays },
   { to: '/parties', label: 'Parties', icon: Users },
   { to: '/products', label: 'Products', icon: Package },
   { to: '/inventory', label: 'Inventory', icon: Warehouse },
   { to: '/sync', label: 'Sync Center', icon: RefreshCw },
+  { to: '/backups', label: 'Backups', icon: DatabaseBackup },
 ];
 
 const accountingNav = [
@@ -50,7 +57,7 @@ export function Layout() {
     <div className="flex min-h-screen">
       <aside className="flex w-56 flex-col border-r bg-card print:hidden">
         <div className="border-b px-4 py-4">
-          <div className="text-base font-bold leading-tight">Leather ERP</div>
+          <div className="text-base font-bold leading-tight">NSK Enterprise</div>
           {install && (
             <div className="mt-1.5 flex items-center gap-1.5">
               <Badge variant="secondary">{install.branchCode}</Badge>
@@ -112,11 +119,12 @@ export function Layout() {
             ))}
           </div>
         </nav>
-        <div className="border-t p-3">
-          <div className="mb-2 px-1 text-sm">
+        <div className="space-y-2 border-t p-3">
+          <div className="px-1 text-sm">
             <div className="font-medium">{user?.fullName}</div>
             <div className="text-xs text-muted-foreground">{user?.role}</div>
           </div>
+          <ThemeToggle className="w-full" />
           <Button variant="outline" size="sm" className="w-full" onClick={() => void logout()}>
             <LogOut className="h-3.5 w-3.5" /> Sign out
           </Button>

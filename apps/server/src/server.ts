@@ -1,6 +1,12 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
-import { openDatabase, runMigrations, seedDatabase, type Db } from '@leather-erp/db';
+import {
+  applyPendingRestore,
+  openDatabase,
+  runMigrations,
+  seedDatabase,
+  type Db,
+} from '@leather-erp/db';
 import { AppError } from './errors';
 import { authPlugin } from './plugins/auth';
 import { registerAuthRoutes } from './routes/auth.routes';
@@ -11,8 +17,10 @@ import { registerDashboardRoutes } from './routes/dashboard.routes';
 import { registerAccountingRoutes } from './routes/accounting.routes';
 import { registerReportRoutes } from './routes/reports.routes';
 import { registerInventoryRoutes } from './routes/inventory.routes';
+import { registerBackupRoutes } from './routes/backup.routes';
 import { AuthService } from './services/auth.service';
 import { SyncService } from './services/sync.service';
+import { BackupService } from './services/backup.service';
 import { ExpenseService } from './services/expense.service';
 import { InstallService } from './services/install.service';
 import { LedgerService } from './services/ledger.service';
@@ -44,6 +52,9 @@ export interface AppContext {
   expenses: ExpenseService;
   inventory: InventoryService;
   sync: SyncService;
+  backup: BackupService;
+  /** True when a staged restore was applied during this startup. */
+  restoreApplied: boolean;
 }
 
 export interface BuiltServer {
@@ -57,6 +68,8 @@ export interface BuiltServer {
  * this app is strictly local, never bound to a network interface.
  */
 export async function buildServer(options: BuildServerOptions): Promise<BuiltServer> {
+  // A staged restore must be swapped in BEFORE the DB is opened.
+  const restoreApplied = applyPendingRestore(options.dbPath);
   const { sqlite, db } = openDatabase(options.dbPath);
   runMigrations(db);
   await seedDatabase(db);
@@ -81,6 +94,8 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
     expenses: new ExpenseService(deps),
     inventory: new InventoryService(deps, products),
     sync: new SyncService(deps, options.dbPath),
+    backup: new BackupService(deps, options.dbPath),
+    restoreApplied,
   };
 
   const app = Fastify({ logger: options.logger ?? false });
@@ -120,6 +135,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   app.get('/api/health', async () => ({
     ok: true,
     branchConfigured: ctx.install.getInstall() !== null,
+    restoreApplied: ctx.restoreApplied,
   }));
 
   registerAuthRoutes(app, ctx.auth);
@@ -130,8 +146,11 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   registerAccountingRoutes(app, ctx);
   registerReportRoutes(app, ctx);
   registerInventoryRoutes(app, ctx);
+  registerBackupRoutes(app, ctx);
 
   app.addHook('onClose', async () => {
+    // Best-effort snapshot on shutdown (no-op unless a backup passphrase is set).
+    ctx.backup.backupOnClose();
     ctx.sqlite.close();
   });
 

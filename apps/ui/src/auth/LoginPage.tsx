@@ -7,6 +7,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { ErrorNote } from '../components/ui/spinner';
+import { ThemeToggle } from '../theme/ThemeToggle';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -31,10 +32,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-muted/40 p-4">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle showLabel={false} />
+      </div>
       <Card className="w-full max-w-sm">
         <CardContent className="p-6">
-          <h1 className="mb-1 text-xl font-bold">Leather ERP</h1>
+          <h1 className="mb-1 text-xl font-bold">NSK Enterprise</h1>
           <p className="mb-6 text-sm text-muted-foreground">Sign in to this branch PC</p>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">

@@ -89,7 +89,7 @@ export function DashboardPage() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.series} margin={{ top: 8, right: 16, bottom: 0, left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(28 15% 90%)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(28 12% 50% / 0.25)" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(d: string) => d.slice(5)} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatPaisa(v)} width={90} />
                 <Tooltip formatter={(v: number | string) => formatPaisa(Number(v))} />
