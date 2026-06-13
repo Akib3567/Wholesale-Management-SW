@@ -31,3 +31,25 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Print to PDF: drop chrome, show all rows, fit to page. */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Let long reports paginate instead of clipping to one screen. */
+  .overflow-auto,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+  table {
+    font-size: 11px;
+  }
+  tr {
+    break-inside: avoid;
+  }
+}

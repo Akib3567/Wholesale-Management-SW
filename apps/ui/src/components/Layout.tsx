@@ -20,14 +20,29 @@ const nav = [
   { to: '/products', label: 'Products', icon: Package },
 ];
 
-const comingSoon = ['Daily', 'Accounting', 'Reports', 'Inventory', 'Sync Center', 'Settings'];
+const accountingNav = [
+  { to: '/accounting/journal', label: 'Journal' },
+  { to: '/accounting/ledger', label: 'Ledger' },
+  { to: '/accounting/cash-book', label: 'Cash Book' },
+  { to: '/accounting/bank-book', label: 'Bank Book' },
+  { to: '/accounting/trial-balance', label: 'Trial Balance' },
+];
+
+const reportsNav = [
+  { to: '/reports/daily-sales', label: 'Daily Sales' },
+  { to: '/reports/daily-purchases', label: 'Daily Purchase' },
+  { to: '/reports/statement', label: 'Statement' },
+  { to: '/reports/pnl', label: 'Profit & Loss' },
+];
+
+const comingSoon = ['Daily', 'Inventory', 'Sync Center', 'Settings'];
 
 export function Layout() {
   const { user, install, logout } = useAuth();
 
   return (
     <div className="flex min-h-screen">
-      <aside className="flex w-56 flex-col border-r bg-card">
+      <aside className="flex w-56 flex-col border-r bg-card print:hidden">
         <div className="border-b px-4 py-4">
           <div className="text-base font-bold leading-tight">Leather ERP</div>
           {install && (
@@ -37,7 +52,7 @@ export function Layout() {
             </div>
           )}
         </div>
-        <nav className="flex-1 space-y-0.5 p-2">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
           {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
@@ -52,6 +67,32 @@ export function Layout() {
               <Icon className="h-4 w-4" />
               {label}
             </NavLink>
+          ))}
+          {(
+            [
+              ['Accounting', accountingNav],
+              ['Reports', reportsNav],
+            ] as const
+          ).map(([section, items]) => (
+            <div key={section} className="pt-2">
+              <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                {section}
+              </div>
+              {items.map(({ to, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    cn(
+                      'block rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                      isActive && 'bg-accent font-medium text-accent-foreground',
+                    )
+                  }
+                >
+                  {label}
+                </NavLink>
+              ))}
+            </div>
           ))}
           <div className="pt-3">
             {comingSoon.map((label) => (
@@ -75,7 +116,7 @@ export function Layout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 overflow-x-hidden bg-muted/30 p-6">
+      <main className="flex-1 overflow-x-hidden bg-muted/30 p-6 print:bg-white print:p-0">
         <Outlet />
       </main>
     </div>

@@ -8,6 +8,8 @@ import { registerInstallRoutes } from './routes/install.routes';
 import { registerTradeRoutes } from './routes/trade.routes';
 import { registerSyncRoutes } from './routes/sync.routes';
 import { registerDashboardRoutes } from './routes/dashboard.routes';
+import { registerAccountingRoutes } from './routes/accounting.routes';
+import { registerReportRoutes } from './routes/reports.routes';
 import { AuthService } from './services/auth.service';
 import { SyncService } from './services/sync.service';
 import { ExpenseService } from './services/expense.service';
@@ -121,6 +123,8 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   registerTradeRoutes(app, ctx);
   registerSyncRoutes(app, ctx);
   registerDashboardRoutes(app, ctx);
+  registerAccountingRoutes(app, ctx);
+  registerReportRoutes(app, ctx);
 
   app.addHook('onClose', async () => {
     ctx.sqlite.close();

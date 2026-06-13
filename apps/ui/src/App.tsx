@@ -11,6 +11,13 @@ import { SalesPage } from './pages/SalesPage';
 import { SaleFormPage } from './pages/SaleFormPage';
 import { PartiesPage } from './pages/PartiesPage';
 import { ProductsPage } from './pages/ProductsPage';
+import { JournalPage } from './pages/accounting/JournalPage';
+import { LedgerPage } from './pages/accounting/LedgerPage';
+import { CashBook, BankBook } from './pages/accounting/BooksPages';
+import { TrialBalancePage } from './pages/accounting/TrialBalancePage';
+import { DailySales, DailyPurchases } from './pages/reports/DailyPages';
+import { StatementPage } from './pages/reports/StatementPage';
+import { PnlPage } from './pages/reports/PnlPage';
 
 export function App() {
   return (
@@ -33,6 +40,15 @@ export function App() {
           <Route path="/sales/new" element={<SaleFormPage />} />
           <Route path="/parties" element={<PartiesPage />} />
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/accounting/journal" element={<JournalPage />} />
+          <Route path="/accounting/ledger" element={<LedgerPage />} />
+          <Route path="/accounting/cash-book" element={<CashBook />} />
+          <Route path="/accounting/bank-book" element={<BankBook />} />
+          <Route path="/accounting/trial-balance" element={<TrialBalancePage />} />
+          <Route path="/reports/daily-sales" element={<DailySales />} />
+          <Route path="/reports/daily-purchases" element={<DailyPurchases />} />
+          <Route path="/reports/statement" element={<StatementPage />} />
+          <Route path="/reports/pnl" element={<PnlPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
