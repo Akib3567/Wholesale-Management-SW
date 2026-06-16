@@ -73,6 +73,27 @@ export class PartyService {
     return row;
   }
 
+  /**
+   * Net outstanding balance per party from AR/AP journal lines (includes the
+   * opening balance, since that was posted as a journal entry). Positive =
+   * the party owes us (receivable, "Pabo"); negative = we owe them (payable,
+   * "Debo"). Computed across all journal lines on this install.
+   */
+  balancesByParty(): Map<string, number> {
+    const rows = this.deps.sqlite
+      .prepare(
+        `SELECT party_id AS partyId, COALESCE(SUM(debit_paisa - credit_paisa), 0) AS balancePaisa
+         FROM journal_lines
+         WHERE party_id IS NOT NULL AND account_id IN (?, ?)
+         GROUP BY party_id`,
+      )
+      .all(SYSTEM_ACCOUNTS.ACCOUNTS_RECEIVABLE, SYSTEM_ACCOUNTS.ACCOUNTS_PAYABLE) as Array<{
+      partyId: string;
+      balancePaisa: number;
+    }>;
+    return new Map(rows.map((r) => [r.partyId, r.balancePaisa]));
+  }
+
   create(input: z.input<typeof createPartySchema>, actorId: string | null): Party {
     const parsed = createPartySchema.parse(input);
     const install = requireInstall(this.deps);

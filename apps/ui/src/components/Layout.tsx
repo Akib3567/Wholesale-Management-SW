@@ -21,14 +21,14 @@ import { cn } from '../lib/utils';
 
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/sales', label: 'Sales', icon: Tag },
-  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
-  { to: '/payments', label: 'Payments', icon: Wallet },
-  { to: '/expenses', label: 'Expenses', icon: Receipt },
-  { to: '/daily', label: 'Daily', icon: CalendarDays },
+  { to: '/sales', label: 'Sales (Bikri)', icon: Tag },
+  { to: '/purchases', label: 'Purchases (Kena)', icon: ShoppingCart },
+  { to: '/payments', label: 'Payments (Lenden)', icon: Wallet },
+  { to: '/expenses', label: 'Expenses (Khoroch)', icon: Receipt },
+  { to: '/daily', label: 'Daily (Dainik)', icon: CalendarDays },
   { to: '/parties', label: 'Parties', icon: Users },
-  { to: '/products', label: 'Products', icon: Package },
-  { to: '/inventory', label: 'Inventory', icon: Warehouse },
+  { to: '/products', label: 'Products (Ponno)', icon: Package },
+  { to: '/inventory', label: 'Inventory (Maal)', icon: Warehouse },
   { to: '/sync', label: 'Sync Center', icon: RefreshCw },
   { to: '/backups', label: 'Backups', icon: DatabaseBackup },
 ];

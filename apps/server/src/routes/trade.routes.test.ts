@@ -87,6 +87,33 @@ describe('trade API end to end', () => {
     expect((list.json() as { purchases: unknown[] }).purchases).toHaveLength(1);
   });
 
+  it('lists party balances with ?withBalances (positive = owes us, negative = we owe)', async () => {
+    // a customer who owes us 300.00 (opening receivable)
+    const custRes = await server.app.inject({
+      method: 'POST',
+      url: '/api/parties',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { name: 'Balance Customer', kind: 'customer', openingBalancePaisa: 30_000 },
+    });
+    const custId = (custRes.json() as { party: { id: string } }).party.id;
+
+    const res = await server.app.inject({
+      method: 'GET',
+      url: '/api/parties?withBalances=1',
+      headers: { authorization: `Bearer ${viewerToken}` },
+    });
+    expect(res.statusCode).toBe(200);
+    const parties = (res.json() as { parties: Array<{ id: string; name: string; balancePaisa: number }> })
+      .parties;
+
+    const cust = parties.find((p) => p.id === custId)!;
+    expect(cust.balancePaisa).toBe(30_000); // Pabo
+
+    // the supplier from the earlier credit purchase owes-side: we owe 500.00
+    const supplier = parties.find((p) => p.name === 'API Supplier')!;
+    expect(supplier.balancePaisa).toBe(-50_000); // Debo
+  });
+
   it('viewer can read but cannot write (403)', async () => {
     const denied = await server.app.inject({
       method: 'POST',

@@ -105,6 +105,8 @@ export interface Party {
   address: string | null;
   openingBalancePaisa: number;
   isActive: boolean;
+  /** Present only when fetched with ?withBalances=1. +ve = owes us (Pabo), -ve = we owe (Debo). */
+  balancePaisa?: number;
 }
 
 export interface Product {

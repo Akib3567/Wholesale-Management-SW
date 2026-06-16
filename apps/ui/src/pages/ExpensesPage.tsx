@@ -45,7 +45,7 @@ export function ExpensesPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Expenses</h1>
+        <h1 className="text-xl font-bold">Expenses (Khoroch)</h1>
         {hasRole('operator') && (
           <Button onClick={() => setOpen(true)} disabled={expenseAccounts.length === 0}>
             <Plus className="h-4 w-4" /> New Expense

@@ -101,8 +101,8 @@ export function DocListPage({
               <TH>Branch</TH>
               <TH>{partyLabel}</TH>
               <TH className="text-right">Total</TH>
-              <TH className="text-right">Paid</TH>
-              <TH className="text-right">Due</TH>
+              <TH className="text-right">Paid (Porishodh)</TH>
+              <TH className="text-right">Due (Baki)</TH>
               <TH>Status</TH>
               <TH />
             </TR>

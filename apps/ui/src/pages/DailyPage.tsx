@@ -71,11 +71,11 @@ export function DailyPage() {
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
               {(
                 [
-                  ['Opening cash (B/F)', data.openingCashPaisa],
-                  ['Sales', data.totals.salesPaisa],
-                  ['Purchases', data.totals.purchasesPaisa],
-                  ['Expenses', data.totals.expensesPaisa],
-                  ['Closing cash', data.closingCashPaisa],
+                  ['Opening Cash / Nogod (B/F)', data.openingCashPaisa],
+                  ['Sales (Bikri)', data.totals.salesPaisa],
+                  ['Purchases (Kena)', data.totals.purchasesPaisa],
+                  ['Expenses (Khoroch)', data.totals.expensesPaisa],
+                  ['Closing Cash (Nogod)', data.closingCashPaisa],
                 ] as const
               ).map(([label, v]) => (
                 <Card key={label}>
@@ -91,7 +91,7 @@ export function DailyPage() {
               <Card>
                 <CardContent className="p-3">
                   <div className="text-xs text-muted-foreground">
-                    Total Receivables (due to us) — as of {data.date}
+                    Total Receivables — Pabo (due to us) — as of {data.date}
                   </div>
                   <div className="text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
                     {formatPaisa(data.receivablesPaisa)}
@@ -101,7 +101,7 @@ export function DailyPage() {
               <Card>
                 <CardContent className="p-3">
                   <div className="text-xs text-muted-foreground">
-                    Total Payables (we owe) — as of {data.date}
+                    Total Payables — Debo (we owe) — as of {data.date}
                   </div>
                   <div className="text-lg font-bold tabular-nums text-red-700 dark:text-red-400">
                     {formatPaisa(data.payablesPaisa)}

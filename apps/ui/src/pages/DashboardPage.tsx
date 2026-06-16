@@ -67,18 +67,18 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard title={`Today's Sales (${scopeLabel})`} value={formatPaisa(data.today.salesPaisa)} />
-        <StatCard title="Today's Purchases" value={formatPaisa(data.today.purchasesPaisa)} />
-        <StatCard title="Today's Expenses" value={formatPaisa(data.today.expensesPaisa)} />
+        <StatCard title={`Today's Sales · Bikri (${scopeLabel})`} value={formatPaisa(data.today.salesPaisa)} />
+        <StatCard title="Today's Purchases (Kena)" value={formatPaisa(data.today.purchasesPaisa)} />
+        <StatCard title="Today's Expenses (Khoroch)" value={formatPaisa(data.today.expensesPaisa)} />
         <StatCard
-          title={`Low Stock (${data.lowStockBranch})`}
+          title={`Low Stock · Kom Maal (${data.lowStockBranch})`}
           value={String(data.lowStockCount)}
           accent={data.lowStockCount > 0 ? 'text-destructive' : ''}
         />
-        <StatCard title="Cash in Hand" value={formatPaisa(data.cashPaisa)} />
+        <StatCard title="Cash in Hand (Nogod)" value={formatPaisa(data.cashPaisa)} />
         <StatCard title="Bank" value={formatPaisa(data.bankPaisa)} />
-        <StatCard title="Receivables (Due to us)" value={formatPaisa(data.receivablesPaisa)} />
-        <StatCard title="Payables (We owe)" value={formatPaisa(data.payablesPaisa)} />
+        <StatCard title="Receivables — Pabo (due to us)" value={formatPaisa(data.receivablesPaisa)} />
+        <StatCard title="Payables — Debo (we owe)" value={formatPaisa(data.payablesPaisa)} />
       </div>
 
       <Card>

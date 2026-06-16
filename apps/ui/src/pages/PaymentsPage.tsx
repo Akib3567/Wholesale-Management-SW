@@ -51,7 +51,7 @@ export function PaymentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Payments &amp; Receipts</h1>
+        <h1 className="text-xl font-bold">Payments &amp; Receipts (Taka Lenden)</h1>
         {hasRole('operator') && (
           <Button onClick={() => setOpen(true)} disabled={parties.length === 0}>
             <Plus className="h-4 w-4" /> New Payment / Receipt
@@ -86,13 +86,13 @@ export function PaymentsPage() {
           <div className="grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="p-3">
-                <div className="text-xs text-muted-foreground">Received (in)</div>
+                <div className="text-xs text-muted-foreground">Received — Joma (in)</div>
                 <div className="text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400">{formatPaisa(totalIn)}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3">
-                <div className="text-xs text-muted-foreground">Paid (out)</div>
+                <div className="text-xs text-muted-foreground">Paid — Porishodh (out)</div>
                 <div className="text-lg font-bold tabular-nums text-red-700 dark:text-red-400">{formatPaisa(totalOut)}</div>
               </CardContent>
             </Card>
@@ -207,8 +207,8 @@ function PaymentDialog({
               setPartyId('');
             }}
           >
-            <option value="in">Receipt — money in from a customer</option>
-            <option value="out">Payment — money out to a supplier</option>
+            <option value="in">Receipt — money in from a customer (Taka Paowa)</option>
+            <option value="out">Payment — money out to a supplier (Taka Deya)</option>
           </Select>
         </div>
         <div className="space-y-1.5">

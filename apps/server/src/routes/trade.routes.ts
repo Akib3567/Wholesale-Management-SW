@@ -43,9 +43,15 @@ export function registerTradeRoutes(app: FastifyInstance, ctx: AppContext): void
         kind: z.enum(['customer', 'supplier', 'both']).optional(),
         q: z.string().optional(),
         includeInactive: z.coerce.boolean().optional(),
+        withBalances: z.coerce.boolean().optional(),
       })
       .parse(req.query);
-    return { parties: ctx.parties.list(q) };
+    const list = ctx.parties.list(q);
+    if (q.withBalances) {
+      const balances = ctx.parties.balancesByParty();
+      return { parties: list.map((p) => ({ ...p, balancePaisa: balances.get(p.id) ?? 0 })) };
+    }
+    return { parties: list };
   });
   app.get('/api/parties/:id', read, async (req) => ({
     party: ctx.parties.get(idParam.parse(req.params).id),
