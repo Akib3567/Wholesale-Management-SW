@@ -250,6 +250,47 @@ export interface BackupsData {
   backups: BackupRecord[];
 }
 
+export interface ExportDocRow {
+  date: string;
+  docNo: string;
+  branchCode: string;
+  partyName: string | null;
+  subtotalPaisa: number;
+  discountPaisa: number;
+  totalPaisa: number;
+  paidPaisa: number;
+  status: string;
+  note: string | null;
+}
+export interface ExportPaymentRow {
+  date: string;
+  partyName: string | null;
+  direction: 'in' | 'out';
+  method: string;
+  refNo: string | null;
+  amountPaisa: number;
+  branchCode: string;
+  note: string | null;
+}
+export interface ExportExpenseRow {
+  date: string;
+  accountName: string;
+  paidFromName: string | null;
+  amountPaisa: number;
+  branchCode: string;
+  note: string | null;
+}
+export interface ExportData {
+  from: string;
+  to: string;
+  scope: string;
+  asOf: Array<{ code: string; name: string; lastImportAt: string | null }>;
+  sales: ExportDocRow[];
+  purchases: ExportDocRow[];
+  payments: ExportPaymentRow[];
+  expenses: ExportExpenseRow[];
+}
+
 export interface DashboardData {
   scope: string;
   branchCode: string;

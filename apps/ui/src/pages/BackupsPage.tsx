@@ -1,8 +1,17 @@
 import { useState, type FormEvent } from 'react';
-import { Database, ShieldCheck } from 'lucide-react';
-import { api, ApiError, type BackupRecord, type BackupsData } from '../lib/api';
+import { Database, Download, ShieldCheck } from 'lucide-react';
+import {
+  api,
+  ApiError,
+  type BackupRecord,
+  type BackupsData,
+  type ExportData,
+} from '../lib/api';
 import { useApi } from '../lib/useApi';
+import { formatPaisa } from '../lib/money';
+import { downloadCsv } from '../lib/csv';
 import { useAuth } from '../auth/AuthContext';
+import { AsOfNote, ScopePicker } from '../components/report';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -15,6 +24,11 @@ function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** Plain decimal (no thousands separators) so spreadsheets treat it as a number. */
+function csvAmount(paisa: number): string {
+  return formatPaisa(paisa).replace(/,/g, '');
 }
 
 export function BackupsPage() {
@@ -154,7 +168,120 @@ export function BackupsPage() {
           </CardContent>
         </Card>
       )}
+
+      <CsvExportCard />
     </div>
+  );
+}
+
+function firstOfMonth(): string {
+  const dt = new Date();
+  return new Date(dt.getFullYear(), dt.getMonth(), 1).toLocaleDateString('en-CA');
+}
+const today = () => new Date().toLocaleDateString('en-CA');
+
+/** Download business records for a chosen date range as CSV spreadsheet files. */
+function CsvExportCard() {
+  const [from, setFrom] = useState(firstOfMonth());
+  const [to, setTo] = useState(today());
+  const [scope, setScope] = useState('THIS');
+  const { data, error, loading } = useApi(
+    () => api.get<ExportData>(`/api/export/data?from=${from}&to=${to}&scope=${scope}`),
+    [from, to, scope],
+  );
+
+  const rangeName = `${from}_to_${to}`;
+
+  function downloadSales(kind: 'sales' | 'purchases') {
+    if (!data) return;
+    const rows = data[kind];
+    const partyLabel = kind === 'sales' ? 'Customer' : 'Supplier';
+    downloadCsv(`${kind}-${rangeName}.csv`, [
+      ['Date', 'Doc No', 'Branch', partyLabel, 'Subtotal', 'Discount', 'Total', 'Paid', 'Due', 'Status', 'Note'],
+      ...rows.map((r) => [
+        r.date, r.docNo, r.branchCode, r.partyName ?? (kind === 'sales' ? 'Walk-in' : ''),
+        csvAmount(r.subtotalPaisa), csvAmount(r.discountPaisa), csvAmount(r.totalPaisa),
+        csvAmount(r.paidPaisa), csvAmount(r.totalPaisa - r.paidPaisa), r.status, r.note ?? '',
+      ]),
+    ]);
+  }
+
+  function downloadPayments() {
+    if (!data) return;
+    downloadCsv(`payments-${rangeName}.csv`, [
+      ['Date', 'Party', 'Type', 'Method', 'Reference', 'Amount', 'Branch', 'Note'],
+      ...data.payments.map((r) => [
+        r.date, r.partyName ?? '', r.direction === 'in' ? 'Received' : 'Paid', r.method,
+        r.refNo ?? '', csvAmount(r.amountPaisa), r.branchCode, r.note ?? '',
+      ]),
+    ]);
+  }
+
+  function downloadExpenses() {
+    if (!data) return;
+    downloadCsv(`expenses-${rangeName}.csv`, [
+      ['Date', 'Account', 'Paid From', 'Amount', 'Branch', 'Note'],
+      ...data.expenses.map((r) => [
+        r.date, r.accountName, r.paidFromName ?? '', csvAmount(r.amountPaisa), r.branchCode, r.note ?? '',
+      ]),
+    ]);
+  }
+
+  const datasets = data
+    ? ([
+        ['Sales', data.sales.length, () => downloadSales('sales')],
+        ['Purchases', data.purchases.length, () => downloadSales('purchases')],
+        ['Payments & Receipts', data.payments.length, downloadPayments],
+        ['Expenses', data.expenses.length, downloadExpenses],
+      ] as const)
+    : [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Export data to CSV (date range)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Download your records for a chosen period as CSV spreadsheet files (open in Excel). This
+          is a readable data export — separate from the encrypted snapshots above, which are for
+          restoring this PC.
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label>From</Label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-40" />
+          </div>
+          <div className="space-y-1">
+            <Label>To</Label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40" />
+          </div>
+          <div className="space-y-1">
+            <Label>Scope</Label>
+            <ScopePicker value={scope} onChange={setScope} />
+          </div>
+        </div>
+
+        {data && <AsOfNote asOf={data.asOf} />}
+        {error && <ErrorNote message={error} />}
+        {loading && !data ? (
+          <Spinner />
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {datasets.map(([label, count, dl]) => (
+              <div key={label} className="flex items-center justify-between rounded-md border px-3 py-2">
+                <span className="text-sm">
+                  {label} <span className="text-muted-foreground">({count} records)</span>
+                </span>
+                <Button variant="outline" size="sm" onClick={dl} disabled={count === 0}>
+                  <Download className="h-3.5 w-3.5" /> CSV
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

@@ -18,6 +18,7 @@ import { registerAccountingRoutes } from './routes/accounting.routes';
 import { registerReportRoutes } from './routes/reports.routes';
 import { registerInventoryRoutes } from './routes/inventory.routes';
 import { registerBackupRoutes } from './routes/backup.routes';
+import { registerExportRoutes } from './routes/export.routes';
 import { AuthService } from './services/auth.service';
 import { SyncService } from './services/sync.service';
 import { BackupService } from './services/backup.service';
@@ -147,6 +148,7 @@ export async function buildServer(options: BuildServerOptions): Promise<BuiltSer
   registerReportRoutes(app, ctx);
   registerInventoryRoutes(app, ctx);
   registerBackupRoutes(app, ctx);
+  registerExportRoutes(app, ctx);
 
   app.addHook('onClose', async () => {
     // Best-effort snapshot on shutdown (no-op unless a backup passphrase is set).
